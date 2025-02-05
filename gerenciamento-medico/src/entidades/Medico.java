@@ -24,9 +24,9 @@ public class Medico extends Pessoa {
         return crm;
     }
 
-    public void setCrm(String crm) {
-        this.crm = crm;
-    }
+    //public void setCrm(String crm) {
+     //   this.crm = crm;
+  //  }
 
     public String getEspecialidade() {
         return especialidade;
@@ -34,7 +34,7 @@ public class Medico extends Pessoa {
 
     @Override
     public String getDescricao() {
-        return "Médico: " + getNome() + ", Especialidade: " + getEspecialidade() + ", CRM: " + getCrm();
+        return "Médico: " + super.getDescricao() + ", Especialidade: " + especialidade + ", CRM: " + crm;
     }
 }
 

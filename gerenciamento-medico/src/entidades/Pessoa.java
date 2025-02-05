@@ -34,5 +34,8 @@ public abstract class Pessoa {
         return dataNascimento;
     }
 
-    public abstract String getDescricao(); // Método abstrato que será sobrescrito
+    public String getDescricao() {
+        return "Nome: " + nome + ", CPF: " + cpf + ", Data de Nascimento: " + dataNascimento;
+
+    } // Método abstrato que será sobrescrito
 }

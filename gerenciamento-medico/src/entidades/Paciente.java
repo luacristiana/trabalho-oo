@@ -23,7 +23,6 @@ public class Paciente extends Pessoa {
 
     @Override
     public String getDescricao() {
-        return "Paciente: " + getNome() + "\n" + "CPF: " + getCpf() + "\n" + "Data de Nascimento: " + getDataNascimento();
+        return "Paciente: " + super.getDescricao();
     }
 }
-

@@ -10,13 +10,13 @@ public class Consulta {
     private String status; // Status da consulta (AGENDADA, CANCELADA, REALIZADA)
     private Paciente paciente; // Paciente associado à consulta
     private Medico medico; // Médico responsável pela consulta
-    private List<Exame> examesPrescritos; // Lista de exames prescritos
-    private List<Medicamento> medicamentosPrescritos; // Lista de medicamentos prescritos
+    private List<Exame> examesPrescritos = new ArrayList<>();
+    private List<Medicamento> medicamentosPrescritos = new ArrayList<>();
     private double valorConsulta; // Valor da consulta
 
     public Consulta(LocalDateTime dataConsulta, Paciente paciente, Medico medico, double valorConsulta) {
         this.dataConsulta = dataConsulta;
-        this.duracaoMinutos = 30; // Duração padrão
+        this.duracaoMinutos = duracaoMinutos > 0 ? duracaoMinutos : 30;
         this.status = "AGENDADA"; // Status inicial
         this.paciente = paciente;
         this.medico = medico;
