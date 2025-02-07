@@ -36,6 +36,14 @@ public class Medico extends Pessoa {
     public String getDescricao() {
         return "Médico: " + super.getDescricao() + ", Especialidade: " + especialidade + ", CRM: " + crm;
     }
+
+    public void setEspecialidade(String novaEspecialidade) {
+        this.especialidade = novaEspecialidade;
+    }
+
+    public void setCrm(String novoCrm) {
+        this.crm = novoCrm;
+    }
 }
 
 

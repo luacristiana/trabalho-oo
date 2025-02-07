@@ -38,4 +38,8 @@ public abstract class Pessoa {
         return "Nome: " + nome + ", CPF: " + cpf + ", Data de Nascimento: " + dataNascimento;
 
     } // Método abstrato que será sobrescrito
+
+    public void setDataNascimento(LocalDate novaData) {
+        this.dataNascimento = novaData;
+    }
 }
