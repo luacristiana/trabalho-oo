@@ -37,15 +37,32 @@ public class ConsultaService {
     }
 
     public static void agendarConsulta(Scanner scanner) {
+        if (StorageData.pacientData.isEmpty() || StorageData.medicData.isEmpty()) {
+            System.out.println("Erro: Não há pacientes ou médicos cadastrados para agendar consultas.");
+            return;
+        }
 
         System.out.println("Selecione um paciente:");
         for (int i = 0; i < StorageData.pacientData.size(); i++) {
-            System.out.println((i + 1) + ". " + StorageData.pacientData.get(i).getNome());
+            Paciente paciente = StorageData.pacientData.get(i);
+            System.out.printf("%d. Nome: %s | CPF: %s | Pagamentos Pendentes: R$%.2f%n",
+                    i + 1, paciente.getNome(), paciente.getCpf(), paciente.getPagamentosPendentes());
         }
         System.out.print("Digite o número do paciente: ");
-        int pacienteIndex = scanner.nextInt();
-        Paciente paciente = StorageData.pacientData.get(pacienteIndex - 1);
+        int pacienteIndex = scanner.nextInt() - 1;
 
+        if (pacienteIndex < 0 || pacienteIndex >= StorageData.pacientData.size()) {
+            System.out.println("Erro: Paciente inválido.");
+            return;
+        }
+
+        Paciente paciente = StorageData.pacientData.get(pacienteIndex);
+
+        if (paciente.temPagamentosPendentes()) {
+            System.out.printf("Erro: O paciente '%s' possui pagamentos pendentes no valor de R$%.2f.%n",
+                    paciente.getNome(), paciente.getPagamentosPendentes());
+            return;
+        }
 
         System.out.println("Selecione um médico:");
         for (int i = 0; i < StorageData.medicData.size(); i++) {
@@ -67,6 +84,7 @@ public class ConsultaService {
 
         Consulta consulta = new Consulta(dataConsulta, paciente, medico, valorConsulta);
 
+        consulta.getPaciente().adicionarPagamentoPendente(consulta.getValorConsulta());
         StorageData.consultData.add(consulta);
 
         System.out.println("\nConsulta agendada:");

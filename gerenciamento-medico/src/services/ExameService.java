@@ -49,7 +49,6 @@ public class ExameService {
             return;
         }
 
-        // Selecionar consulta associada
         System.out.println("Selecione uma consulta para associar o exame:");
         for (int i = 0; i < StorageData.consultData.size(); i++) {
             Consulta consulta = StorageData.consultData.get(i);
@@ -78,6 +77,7 @@ public class ExameService {
         LocalDateTime dataPrescricao = LocalDateTime.now();
 
         Exame exame = new Exame(dataPrescricao, consultaAssociada, tipo, custo);
+        exame.getConsultaAssociada().getPaciente().adicionarPagamentoPendente(exame.calcularCusto());
         StorageData.examData.add(exame);
 
         System.out.println("\nExame prescrito com sucesso!");
