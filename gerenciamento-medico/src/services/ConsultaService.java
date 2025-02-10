@@ -12,26 +12,37 @@ import java.util.Scanner;
 
 public class ConsultaService {
 
-    public static void menuConsulta(Scanner scanner){
+    public static void menuConsulta(Scanner scanner) {
         while (true) {
             System.out.println("----------------------------------");
             System.out.println("Gerenciamento de Consultas");
             System.out.println("1. Cadastrar uma consulta");
             System.out.println("2. Listar consultas");
-            System.out.println("3. Remover um consulta");
-            System.out.println("4. Sair do menu de consultas");
+            System.out.println("3. Editar uma consulta");
+            System.out.println("4. Remover uma consulta");
+            System.out.println("5. Sair do menu de consultas");
 
+            System.out.print("Digite a opção desejada: ");
             int opcaoConsulta = scanner.nextInt();
 
-            if (opcaoConsulta == 1) {
-                agendarConsulta(scanner);
-            } else if (opcaoConsulta == 2) {
-                listarConsultas(scanner);
-            } else if (opcaoConsulta == 3) {
-                removeConsulta(scanner);
-            } else {
-                System.out.println("Saindo do menu Consultas");
-                break;
+            switch (opcaoConsulta) {
+                case 1:
+                    agendarConsulta(scanner);
+                    break;
+                case 2:
+                    listarConsultas(scanner);
+                    break;
+                case 3:
+                    editarConsulta(scanner);
+                    break;
+                case 4:
+                    removerConsulta(scanner);
+                    break;
+                case 5:
+                    System.out.println("Saindo do menu Consultas...");
+                    return;
+                default:
+                    System.out.println("Opção inválida! Tente novamente.");
             }
         }
     }
@@ -66,15 +77,20 @@ public class ConsultaService {
 
         System.out.println("Selecione um médico:");
         for (int i = 0; i < StorageData.medicData.size(); i++) {
-            System.out.println((i + 1) + ". " + StorageData.medicData.get(i).getNome());
+            Medico medico = StorageData.medicData.get(i);
+            System.out.printf("%d. Nome: %s | Especialidade: %s%n", i + 1, medico.getNome(), medico.getEspecialidade());
         }
         System.out.print("Digite o número do médico: ");
-        int medicoIndex = scanner.nextInt();
-        Medico medico = StorageData.medicData.get(medicoIndex - 1);
+        int medicoIndex = scanner.nextInt() - 1;
 
+        if (medicoIndex < 0 || medicoIndex >= StorageData.medicData.size()) {
+            System.out.println("Erro: Médico inválido.");
+            return;
+        }
+        Medico medico = StorageData.medicData.get(medicoIndex);
 
+        scanner.nextLine(); // Limpar buffer
         System.out.print("Digite a data da consulta (formato: dd-MM-yyyy HH:mm): ");
-        scanner.nextLine();  // Limpar o buffer
         String dataHoraStr = scanner.nextLine();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         LocalDateTime dataConsulta = LocalDateTime.parse(dataHoraStr, formatter);
@@ -87,67 +103,92 @@ public class ConsultaService {
         consulta.getPaciente().adicionarPagamentoPendente(consulta.getValorConsulta());
         StorageData.consultData.add(consulta);
 
-        System.out.println("\nConsulta agendada:");
-        System.out.println("Paciente: " + paciente.getNome());
-        System.out.println("Médico: " + medico.getNome());
-        System.out.println("Data e Hora: " + consulta.getDataConsulta());
-        System.out.println("Valor da Consulta: " + consulta.getValorConsulta());
+        System.out.println("\nConsulta agendada com sucesso!");
     }
 
     public static void listarConsultas(Scanner scanner) {
-        int numConsulta = 1;
-        for (Consulta consulta: StorageData.consultData) {
-            System.out.println(numConsulta + ". " + consulta.toString());
-            numConsulta += 1;
+        if (StorageData.consultData.isEmpty()) {
+            System.out.println("Nenhuma consulta cadastrada.");
+            return;
         }
 
-        System.out.println("Deseja ver os detalhes de uma consulta?(y/n)");
-        String decision = scanner.nextLine();
-
-        if (decision.toLowerCase(Locale.getDefault()).equals("y")){
-            System.out.println("Digite o número da Consulta que deseja inspecionar: ");
-            int choice_number = scanner.nextInt();
-
-            if ((choice_number-1) > StorageData.consultData.size()) {
-                System.out.println("Consulta não existente, retornando ao menu...");
-            } else {
-
-                Consulta consulta_escolhida = StorageData.consultData.get(choice_number - 1);
-
-                System.out.println("\nDados da Consulta:");
-                System.out.println("Paciente: " + consulta_escolhida.getPaciente().getNome());
-                System.out.println("Médico: " + consulta_escolhida.getMedico().getNome());
-                System.out.println("Data e Hora: " + consulta_escolhida.getDataConsulta());
-                System.out.println("Valor da Consulta: " + consulta_escolhida.getValorConsulta());
-            }
-
-        } else {
-            System.out.println("Voltando ao menu...");
+        for (int i = 0; i < StorageData.consultData.size(); i++) {
+            Consulta consulta = StorageData.consultData.get(i);
+            System.out.printf("%d. Paciente: %s | Médico: %s | Data e Hora: %s | Valor: R$%.2f%n",
+                    i + 1, consulta.getPaciente().getNome(), consulta.getMedico().getNome(),
+                    consulta.getDataConsulta().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")),
+                    consulta.getValorConsulta());
         }
-
     }
 
-    public static void removeConsulta(Scanner scanner) {
+    public static void editarConsulta(Scanner scanner) {
+        listarConsultas(scanner);
+
+        if (StorageData.consultData.isEmpty()) return;
+
+        System.out.print("\nDigite o número da consulta que deseja editar: ");
+        int index = scanner.nextInt() - 1;
+
+        if (index < 0 || index >= StorageData.consultData.size()) {
+            System.out.println("Número inválido!");
+            return;
+        }
+
+        Consulta consulta = StorageData.consultData.get(index);
+
+        scanner.nextLine(); // Limpar buffer
+        System.out.print("Nova data e hora da consulta (" + consulta.getDataConsulta().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")) + "): ");
+        String novaDataHoraStr = scanner.nextLine();
+
+        if (!novaDataHoraStr.isEmpty()) {
+            LocalDateTime novaDataHora = LocalDateTime.parse(novaDataHoraStr, DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
+            consulta.setDataConsulta(novaDataHora);
+        }
+
+        System.out.print("Novo valor da consulta (" + consulta.getValorConsulta() + "): ");
+        String novoValorStr = scanner.nextLine();
+
+        if (!novoValorStr.isEmpty()) {
+            double novoValor = Double.parseDouble(novoValorStr);
+
+            double diferencaValor = novoValor - consulta.getValorConsulta();
+            consulta.setValorConsulta(novoValor);
+
+            Paciente paciente = consulta.getPaciente();
+            paciente.adicionarPagamentoPendente(diferencaValor);
+
+            if (paciente.temPagamentosPendentes()) {
+                System.out.printf("\nAviso: O saldo pendente do paciente '%s' foi atualizado para R$%.2f.%n",
+                        paciente.getNome(), paciente.getPagamentosPendentes());
+            }
+
+        }
+
+        System.out.println("\nConsulta atualizada com sucesso!");
+    }
+
+    public static void removerConsulta(Scanner scanner) {
+        listarConsultas(scanner);
+
         if (StorageData.consultData.isEmpty()) {
-            System.out.println("Não há consultas agendadas para remover.");
+            System.out.println("Não há consultas cadastradas para remover.");
             return;
         }
 
-        System.out.println("Consultas agendadas:");
-        for (int i = 0; i < StorageData.consultData.size(); i++) {
-            System.out.println((i + 1) + ". " + StorageData.consultData.get(i).toString());
-        }
+        System.out.print("\nDigite o número da consulta que deseja remover: ");
+        int consultaIndex = scanner.nextInt() - 1;
 
-        System.out.print("Digite o número da consulta que deseja remover: ");
-        int consultaIndex = scanner.nextInt();
-
-        if (consultaIndex < 1 || consultaIndex > StorageData.consultData.size()) {
-            System.out.println("Número inválido! Nenhuma consulta foi removida.");
+        if (consultaIndex < 0 || consultaIndex >= StorageData.consultData.size()) {
+            System.out.println("Erro: Número inválido! Nenhuma consulta foi removida.");
             return;
         }
 
-        Consulta consultaRemovida = StorageData.consultData.remove(consultaIndex - 1);
-        System.out.println("Consulta removida com sucesso:");
+        Consulta consultaRemovida = StorageData.consultData.remove(consultaIndex);
+
+        Paciente paciente = consultaRemovida.getPaciente();
+        paciente.registrarPagamento(consultaRemovida.getValorConsulta());
+
+        System.out.println("\nConsulta removida com sucesso!");
         System.out.println("Paciente: " + consultaRemovida.getPaciente().getNome());
         System.out.println("Médico: " + consultaRemovida.getMedico().getNome());
         System.out.println("Data e Hora: " + consultaRemovida.getDataConsulta());
