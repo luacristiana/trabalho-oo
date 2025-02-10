@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import static services.PacienteService.menuPacientes;
 import static services.MedicoService.menuMedicos;
 import static services.ConsultaService.menuConsulta;
+import static services.ExameService.menuExames;
+import static services.MedicamentoService.menuMedicamentos;
 
 
 public class Main {
@@ -26,7 +28,9 @@ public class Main {
             System.out.println("1. Gerenciamento de Paciente");
             System.out.println("2. Gerenciamento de Medicos");
             System.out.println("3. Gerenciamento de Consultas");
-            System.out.println("4. Sair");
+            System.out.println("4. Gerenciamento de Exames");
+            System.out.println("5. Gerenciamento de Medicamentos");
+            System.out.println("6. Sair");
             System.out.print("Digite uma opção: ");
 
             int opcao = scanner.nextInt();
@@ -41,10 +45,13 @@ public class Main {
             } else if (opcao == 3) {
                 menuConsulta(scanner);
             } else if (opcao == 4) {
+                menuExames(scanner);
+            } else if (opcao == 5) {
+                menuMedicamentos(scanner);
+            } else if (opcao == 6) {
                 System.out.println("Saindo...");
                 break;
-            }
-            else {
+            } else {
                 System.out.println("Opção inválida! Tente novamente.");
             }
         }
@@ -52,7 +59,7 @@ public class Main {
         scanner.close();
 
     }
-    
+
     public static void main(String[] args) {
         menu();
     }

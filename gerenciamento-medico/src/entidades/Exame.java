@@ -51,4 +51,8 @@ public class Exame extends Prescricao {
                 ", Data de Realização: " + (dataRealizacao != null ? dataRealizacao : "Não realizado") +
                 ", Resultado: " + (resultado != null ? resultado : "Pendente");
     }
+
+    public void setCusto(double novoCusto) {
+        this.custo = novoCusto;
+    }
 }
