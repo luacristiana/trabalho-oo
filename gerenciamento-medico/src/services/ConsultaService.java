@@ -7,6 +7,8 @@ import storage.StorageData;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -88,23 +90,33 @@ public class ConsultaService {
             return;
         }
         Medico medico = StorageData.medicData.get(medicoIndex);
+        try {
+            scanner.nextLine(); // Limpar buffer
+            System.out.print("Digite a data da consulta (formato: dd-MM-yyyy HH:mm): ");
+            String dataHoraStr = scanner.nextLine();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+            LocalDateTime dataConsulta = LocalDateTime.parse(dataHoraStr, formatter);
 
-        scanner.nextLine(); // Limpar buffer
-        System.out.print("Digite a data da consulta (formato: dd-MM-yyyy HH:mm): ");
-        String dataHoraStr = scanner.nextLine();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-        LocalDateTime dataConsulta = LocalDateTime.parse(dataHoraStr, formatter);
+            System.out.print("Digite o valor da consulta (formato: xx.yy): ");
+            String valorStr = scanner.nextLine();
+            double valorConsulta = Double.parseDouble(valorStr.replace(",", "."));
 
-        System.out.print("Digite o valor da consulta: ");
-        double valorConsulta = scanner.nextDouble();
+            Consulta consulta = new Consulta(dataConsulta, paciente, medico, valorConsulta);
 
-        Consulta consulta = new Consulta(dataConsulta, paciente, medico, valorConsulta);
+            consulta.getPaciente().adicionarPagamentoPendente(consulta.getValorConsulta());
+            StorageData.consultData.add(consulta);
 
-        consulta.getPaciente().adicionarPagamentoPendente(consulta.getValorConsulta());
-        StorageData.consultData.add(consulta);
+            System.out.println("\nConsulta agendada com sucesso!");
+        } catch (DateTimeParseException e) {
+            System.out.println("Erro ao criar consulta: formato da Data e Hora incorreto");
+        } catch (NumberFormatException e) {
+            System.out.println("Erro ao criar consulta: formato de Valor incorreto");
+        } catch (InputMismatchException e) {
+            System.out.println("Erro ao criar consulta: entrada inválida");
+        }
 
-        System.out.println("\nConsulta agendada com sucesso!");
     }
+
 
     public static void listarConsultas(Scanner scanner) {
         if (StorageData.consultData.isEmpty()) {
