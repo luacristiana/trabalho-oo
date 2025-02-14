@@ -13,8 +13,9 @@ public class Consulta {
     private List<Exame> examesPrescritos = new ArrayList<>();
     private List<Medicamento> medicamentosPrescritos = new ArrayList<>();
     private double valorConsulta; // Valor da consulta
+    private String especialidade;
 
-    public Consulta(LocalDateTime dataConsulta, Paciente paciente, Medico medico, double valorConsulta) {
+    public Consulta(LocalDateTime dataConsulta, Paciente paciente, Medico medico, double valorConsulta, String especialidade) {
         this.dataConsulta = dataConsulta;
         this.duracaoMinutos = duracaoMinutos > 0 ? duracaoMinutos : 30;
         this.status = "AGENDADA"; // Status inicial
@@ -23,6 +24,7 @@ public class Consulta {
         this.examesPrescritos = new ArrayList<>();
         this.medicamentosPrescritos = new ArrayList<>();
         this.valorConsulta = valorConsulta;
+        this.especialidade = especialidade;
     }
 
     // Getters e Setters
@@ -88,5 +90,9 @@ public class Consulta {
 
     public void setValorConsulta(double valorConsulta) {
         this.valorConsulta = valorConsulta;
+    }
+
+    public LocalDateTime getDataHora() {
+        return dataConsulta;
     }
 }

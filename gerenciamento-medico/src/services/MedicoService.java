@@ -63,7 +63,7 @@ public class MedicoService {
         System.out.print("Digite a especialidade do médico: ");
         String especialidade = scanner.nextLine();
 
-        Medico medico = new Medico(nome, cpf, dataNascimento, crm, especialidade);
+        Medico medico = new Medico(nome, cpf, dataNascimento, especialidade, crm);
         StorageData.medicData.add(medico);
 
         System.out.println("\nMédico cadastrado com sucesso!");

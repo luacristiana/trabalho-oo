@@ -3,6 +3,9 @@ package services;
 import entidades.Consulta;
 import entidades.Medico;
 import entidades.Paciente;
+import excecoes.HorarioIndisponivelException;
+import excecoes.PagamentoPendenteException;
+import excecoes.EspecialidadeInvalidaException;
 import storage.StorageData;
 
 import java.time.LocalDateTime;
@@ -11,6 +14,7 @@ import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.Scanner;
+
 
 public class ConsultaService {
 
@@ -29,7 +33,11 @@ public class ConsultaService {
 
             switch (opcaoConsulta) {
                 case 1:
-                    agendarConsulta(scanner);
+                    try {
+                        agendarConsulta(scanner);
+                    } catch (PagamentoPendenteException | EspecialidadeInvalidaException | HorarioIndisponivelException e) {
+                        System.out.println(e.getMessage());
+                    }
                     break;
                 case 2:
                     listarConsultas(scanner);
@@ -72,9 +80,12 @@ public class ConsultaService {
         Paciente paciente = StorageData.pacientData.get(pacienteIndex);
 
         if (paciente.temPagamentosPendentes()) {
-            System.out.printf("Erro: O paciente '%s' possui pagamentos pendentes no valor de R$%.2f.%n",
-                    paciente.getNome(), paciente.getPagamentosPendentes());
-            return;
+            String errorMensagem = String.format(
+                    "Erro: O paciente '%s' possui pagamentos pendentes no valor de R$%.2f.%n",
+                    paciente.getNome(), paciente.getPagamentosPendentes()
+            );
+
+            throw new PagamentoPendenteException(errorMensagem);
         }
 
         System.out.println("Selecione um médico:");
@@ -97,11 +108,42 @@ public class ConsultaService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
             LocalDateTime dataConsulta = LocalDateTime.parse(dataHoraStr, formatter);
 
+            // Verificar conflitos de horário
+            for (Consulta consultaAgendada : StorageData.consultData) {
+                if (consultaAgendada.getMedico().equals(medico)) {
+                    LocalDateTime inicioExistente = consultaAgendada.getDataHora();
+                    LocalDateTime fimExistente = inicioExistente.plusMinutes(30);
+                    LocalDateTime fimNovaConsulta = dataConsulta.plusMinutes(30);
+
+                    boolean conflito = !(dataConsulta.isAfter(fimExistente) || fimNovaConsulta.isBefore(inicioExistente));
+                    if (conflito) {
+                        String errorMensagem = String.format(
+                                "Erro: O horário solicitado (%s) conflita com outra consulta agendada para este médico em %s.",
+                                dataConsulta.format(formatter), inicioExistente.format(formatter)
+                        );
+                        throw new HorarioIndisponivelException(errorMensagem);
+                    }
+                }
+            }
+
             System.out.print("Digite o valor da consulta (formato: xx.yy): ");
             String valorStr = scanner.nextLine();
             double valorConsulta = Double.parseDouble(valorStr.replace(",", "."));
 
-            Consulta consulta = new Consulta(dataConsulta, paciente, medico, valorConsulta);
+            System.out.print("Digite a especialidade da Consulta: ");
+            String especialidade = scanner.nextLine();
+
+            if (!medico.getEspecialidade().equals(especialidade)) {
+                String errorMensagem = String.format(
+                        "Erro: O médico '%s' não possui a especialidade requerida para esta consulta: '%s'.",
+                        medico.getNome(), especialidade
+                );
+
+                throw new EspecialidadeInvalidaException(errorMensagem);
+            }
+
+
+            Consulta consulta = new Consulta(dataConsulta, paciente, medico, valorConsulta, especialidade);
 
             consulta.getPaciente().adicionarPagamentoPendente(consulta.getValorConsulta());
             StorageData.consultData.add(consulta);
